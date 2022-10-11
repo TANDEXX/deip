@@ -1,8 +1,12 @@
 package deip.lib;
 
 import java.awt.*;
-import deip.data.Conf;
-import deip.game.phy.Obj;
+//import java.time.*;
+//import java.time.format.*;
+import java.util.*;
+
+import deip.data.*;
+import deip.game.phy.*;
 
 public class Util {
 	
@@ -61,19 +65,23 @@ public class Util {
 		
 	}
 	
-	public static int currentLevel(int score, int[] levels) {
-		int b = 0;
+	public static Pair<Integer, Integer> currentLevelAndRest(int score, int[] levels) {
+		int a = 0;
 		
 		try {
-			for (int a = score; a >= levels[b]; a -= levels[b]) {
+			while (score >= levels[a]) {
 				
-				b++;
+				score -= levels[a];
+				a++;
 			}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			return levels.length;
-		}
+		} catch (ArrayIndexOutOfBoundsException e) {}
 		
-		return b;
+		return new Pair(a, score);
+	}
+	
+	public static int currentLevel(int score, int[] levels) {
+		
+		return currentLevelAndRest(score, levels).a;
 	}
 	
 	// use outside Phy class (in simplification)
@@ -108,6 +116,123 @@ public class Util {
 	public static Color colorBetween(Color a, Color b, int at) {
 		
 		return new Color(between(a.getBlue(), b.getBlue(), at) | (between(a.getGreen(), b.getGreen(), at) << 8) | (between(a.getRed(), b.getRed(), at) << 16));
+	}
+	
+	public static String formatPlayTime(int invertedLifetime) {
+		
+		if (invertedLifetime < 60) {
+			return invertedLifetime * (1000 / 60) + " milliSeconds";
+		} else if (invertedLifetime < 60 * 60) {
+			return invertedLifetime / 60 + " seconds";
+		} else if (invertedLifetime < 60 * 60 * 60) {
+			return invertedLifetime / 60 / 60 + " minutes";
+		} else if (invertedLifetime < 60 * 60 * 60 * 24) {
+			return invertedLifetime / 60 / 60 / 60 + " hours";
+		} else if (invertedLifetime < 60 * 60 * 60 * 24 * 30) {
+			return invertedLifetime / 60 / 60 / 60 / 24 + " days";
+		} else if (invertedLifetime < 60 * 60 * 60 * 24 * 30 * 12) {
+			return invertedLifetime / 60 / 60 / 60 / 24 / 30 + "months";
+		} else {
+			return invertedLifetime / 60 / 60 / 60 / 24 / 30 / 12 + "years";
+		}
+		
+	}
+	
+	public static String formatedDatetime() {
+		
+		//return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd__HH_mm_ss"));
+		return Long.toString(System.currentTimeMillis());
+	}
+	
+	public static void putIntToByteArray(byte[] array, int value, int idx) {
+		
+		array[idx + 3] = (byte) (value & 0xff);
+		array[idx + 2] = (byte) (value >> 8 & 0xff);
+		array[idx + 1] = (byte) (value >> 16 & 0xff);
+		array[idx + 0] = (byte) (value >> 24 & 0xff);
+		
+	}
+	
+	public static void putIntToByteArrayList(ArrayList<Byte> al, int value) {
+		
+		al.add((byte) (value >> 24 & 0xff));
+		al.add((byte) (value >> 16 & 0xff));
+		al.add((byte) (value >> 8 & 0xff));
+		al.add((byte) (value & 0xff));
+		
+	}
+	
+	public static void putByteArrayToByteArray(byte[] array, byte[] secArray, int idx) {
+		
+		for (int a = 0; a < secArray.length; a++) {
+			array[idx + a] = secArray[a];
+		}
+		
+	}
+	
+	public static void putByteArrayToByteArrayList(ArrayList<Byte> al, byte[] ar) {
+		
+		for (byte b : ar) {
+			al.add(b);
+		}
+		
+	}
+	
+	public static void putByteArrayListToByteArrayList(ArrayList<Byte> a0, ArrayList<Byte> a1) {
+		
+		for (Byte aByte : a1) {
+			a0.add(aByte);
+		}
+		
+	}
+	
+	public static int getIntFromByteArray(byte[] array, int idx) {
+		int result = array[idx + 3];
+		result |= (int) array[idx + 2] << 8;
+		result |= (int) array[idx + 1] << 16;
+		result |= (int) array[idx] << 24;
+		
+		return result;
+	}
+	
+	public static class Press {
+		
+		public boolean press = false;
+		public boolean lastPress = false;
+		public boolean released = false;
+		public boolean pressed = false;
+		
+		public void register(boolean press) {
+			
+			lastPress = this.press;
+			this.press = press;
+			
+			pressed = false;
+			if (press && !lastPress) {
+				pressed = true;
+			}
+			
+			released = false;
+			if (!press && lastPress) {
+				released = true;
+			}
+			
+		}
+		
+	}
+	
+	public static class Pair<A, B> {
+		
+		public A a;
+		public B b;
+		
+		public Pair(A a, B b) {
+			
+			this.a = a;
+			this.b = b;
+			
+		}
+		
 	}
 	
 }
