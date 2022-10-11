@@ -7,3 +7,6 @@ theres `run.sh` script for linux if you want to use it, but it should work on an
 
 # want to play
 the game is always `jarOutput.jar` file, here's compiled for 6 java version, so just download it (maybe change name) and run
+
+# probably won't be updated
+I don't want to work on it anymore. Too long
