@@ -1,6 +1,6 @@
 package deip.data;
 
-import deip.g.*;
+import deip.graphics.*;
 import deip.game.phy.*;
 
 import java.awt.*;
@@ -11,6 +11,9 @@ public class Conf {
 	// graphics
 	public static final Font debugFont = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
 	public static final Font bottomBarFont = new Font(Font.DIALOG, Font.BOLD, 753664);
+	public static final Font buttonTextFont = new Font(Font.DIALOG, Font.BOLD, -0);
+	public static final Font dsStatFont = new Font(Font.DIALOG, Font.BOLD, 22);
+	public static final Font dsNickFont = new Font(Font.DIALOG, Font.BOLD, 40);
 	public static final Color bgColor = new Color(0xBED5BC);
 	public static final Color gridColor = new Color(0x6B8D61);
 	public static final Color tankFrendlyBodyColor = new Color(0x0099FF);
@@ -27,6 +30,8 @@ public class Conf {
 	public static final Color starBorderColor = new Color(0xBDBD14);
 	public static final Color paneBodyColor = new Color(0x14E3AA);
 	public static final Color paneBorderColor = new Color(0x26B18B);
+	public static final Color movingPolygonBody = new Color(0xDC880A);
+	public static final Color movingPolygonBorder = new Color(0xB4770A);
 	public static final Color barrelBodyColor = new Color(0x505050);
 	public static final Color barrelBorderColor = new Color(0x404040);
 	public static final Color debugColor = new Color(0xFF0000);
@@ -36,6 +41,7 @@ public class Conf {
 	public static final Color armorColor = new Color(0x97C1C1);
 	public static final Color scoreBarColor = new Color(0xE8E80C);
 	public static final Color scoreBarTextColor = new Color(0xA8A80B);
+	public static final Color levelProgressBarColor = new Color(0x17E5E5);
 	public static final Color tankClassListBoxCenter = new Color(0x27DB27);
 	public static final Color tankClassListBoxCenterHover = new Color(0x21B321);
 	public static final Color tankClassListBoxCenterPress = new Color(0x1C951C);
@@ -103,16 +109,32 @@ public class Conf {
 	};
 	public static final Color dmgColor = new Color(0xCE4242);
 	public static final Color bulletPartColor = new Color(0x000000);
-	public static final Color noC = new Color(0); // use when you must use Color but don't need to specify color
+	public static final Color dsBgColor = new Color(0x150F0F);
+	public static final Color dsTextColor = new Color(0xD0D0E5);
+	public static final Color buttonCenterColor = new Color(0x5e5e6A);
+	public static final Color buttonOutlineColor = new Color(0x6a6a6f);
+	public static final Color buttonOtherDotColor = new Color(0x66666c); // of course
+	public static final Color buttonTextColor = new Color(0xC5C8D9);
+	public static final Color buttonHoverColor = new Color(0x1D000000, true);
+	public static final Color buttonPressColor = new Color(0x32000000, true);
+	public static final Color bgMapCenterAreaColor = new Color(0x2524B5EE, true);
+	public static final Color bgMapPlayerColor = new Color(0x651E92F1, true);
+	public static final Color[] bgNoiseColorPallete = new Color[]{
+		new Color(0x120CBDE2, true),
+		new Color(0x1277E20C, true),
+		new Color(0x14E2370C, true),
+		new Color(0x14171717, true),
+	};
+	public static final Color noC = new Color(0); // use when you must use Color but don't need to specify it
 	public static final byte mapBorderTransStart = 127;
 	public static final int mapBorderTransStep = 0x4ff;
 	public static final int progressBarSpaceMultiply = 1;
 	public static final int progressBarSpaceDivide = 2;
-	public static final int gridBetween = 4000; // disstance between two lines in grid
+	public static final int gridBetween = 4000; // distance between two lines in grid
 	public static final int displaySizeX = 185000; // 1600 default screen size
 	public static final int displaySizeY = 105000; // 900 default screen size
 	public static final int defaultObjBorder = 650;
-	public static final int mapBorderDensityStart = displaySizeX;
+	//public static final int mapBorderDensityStart = displaySizeX;
 	public static final int defBarrelShootOffset = 500;
 	public static final int classMenuBoxDistance = 20515;
 	public static final int classMenuBoxSize = 15416;
@@ -130,12 +152,28 @@ public class Conf {
 	public static final int upgradeNumber = 8;
 	public static final int umXOffset = 40000;
 	public static final int umXOffsetDiv = 12;
+	public static final int dsTransDiv = 12;
+	public static final int dsTransScale = 0xffff;
+	public static final int dsBgTransMax = 96; // 254 max value it can be
 	public static final int destroyTime = 20;
 	public static final int dmgAnimTime = 15;
 	public static final int bulletColorSwap = 512;
+	public static final int buttonGridSize = 15;
+	public static final int buttonBorder = 15;
+	public static final int bgMapPlayerSize = 45;
+	public static final int bgMapPlayerHalfSize = bgMapPlayerSize / 2;
+	public static final int bgNoiseDensity = 100;
+	public static final int bgNoiseMinSize = 5;
+	public static final int bgNoiseDifSize = 10;
+	public static final int cameraFollowDiv = 5;
 	public static final long maxProgress = 4096;
+	public static final double dsButtonsYMul = 0.65; // height of window multiplied by this number
+	public static final double dsButtonRetryXMul = 0.4;
+	public static final double dsButtonSRecXMul = 0.6;
+	public static final double dsButtonsHeightMul = 0.08;
+	public static final double dsButtonRetryWidthMul = 2.8; // this is height to width scale
+	public static final double dsButtonSRecWidthMul = 6.65; // same as above
 	public static final double destroyMultiplier = 1.06; // multiplies object size by this value when lifetime is at end (and when object is destroyed)
-	public static final boolean debug = false; // debug mode
 	
 	// game
 	public static final int mapSize = 1500000;
@@ -180,9 +218,10 @@ public class Conf {
 	public static final Obj sqGreenObj = new Obj(0, 0, 2500, basicWeight, 0, 60000, 0, 60, 0, ObjBehavior.newDefault(), new ObjDisplay.RPolygon(4), Obj.ObjType.Res, sqGreenBodyColor, sqGreenBorderColor, new Obj.Barrel[0]);
 	public static final Obj triObj = new Obj(0, 0, 3000, 8, 0, 30000, 0, 20, 0, ObjBehavior.newDefault(), new ObjDisplay.RPolygon(3, 800), Obj.ObjType.Res, triBodyColor, triBorderColor, new Obj.Barrel[0]);
 	public static final Obj pentaObj = new Obj(0, 0, 5000, 16, 0, 100000, 0, 80, 0, ObjBehavior.newDefault(), new ObjDisplay.RPolygon(5), Obj.ObjType.Res, pentaBodyColor, pentaBorderColor, new Obj.Barrel[0]);
-	public static final Obj bPentaObj = new Obj(0, 0, 15000, 450, 0, 15000000, 0, 8000, 1000, ObjBehavior.newDefault(), new ObjDisplay.RPolygon(5), Obj.ObjType.Res, pentaBodyColor, pentaBorderColor, new Obj.Barrel[0]);
+	public static final Obj bPentaObj = new Obj(0, 0, 15000, 450, 0, 3500000, 0, 8000, 1000, ObjBehavior.newDefault(), new ObjDisplay.RPolygon(5), Obj.ObjType.Res, pentaBodyColor, pentaBorderColor, new Obj.Barrel[0]);
 	public static final Obj starObj = new Obj(0, 0, 9000, 5, 0, 550000, 0, 0, 0, new ObjBehavior.StarBehavior(), new ObjDisplay.CursedStar(10, 4500, 9000, 2000), Obj.ObjType.Res, starBodyColor, starBorderColor, new Obj.Barrel[0]);
 	public static final Obj paneObj = new Obj(0, 0, 5000, 45, 0, 1150000, 0, 1300, 0, new ObjBehavior.PaneBehavior(), new ObjDisplay.Star(4, 3500, 6500, 800), Obj.ObjType.Res, paneBodyColor, paneBorderColor, new Obj.Barrel[0]);
+	public static final Obj movingPolygon = new Obj(0, -0, 11000, Integer.MAX_VALUE, 0, 1650000, 0, 2130, 0, ObjBehavior.newDefault(), new ObjDisplay.MovingPolygon(950, 7), Obj.ObjType.Res, movingPolygonBody, movingPolygonBorder, new Obj.Barrel[]{});
 	public static final Obj.GroupSpawn[][] regularAreaObjs = new Obj.GroupSpawn[][]{
 		new Obj.GroupSpawn[]{
 			new Obj.GroupSpawn(sqObj, 196, 5, 25, 25000, segmentSize - 2 - 25000),
@@ -192,7 +231,13 @@ public class Conf {
 			new Obj.GroupSpawn(starObj, 3, 1, 0, 0, 1),
 			new Obj.GroupSpawn(paneObj, 24, 1, 2, 6000, 10000),
 		},
-		new Obj.GroupSpawn[]{},
+		new Obj.GroupSpawn[]{
+			new Obj.GroupSpawn(triObj, 164, 4, 7, 20000, segmentSize / 2),
+			new Obj.GroupSpawn(pentaObj, 128, 2, 6, 15000, segmentSize / 3),
+			new Obj.GroupSpawn(sqGreenObj, 1, 1, 0, 0, 1),
+			new Obj.GroupSpawn(starObj, 12, 1, 0, 0, 1),
+			new Obj.GroupSpawn(movingPolygon, 28, 1, 0, 0, 1),
+		},
 	};
 	public static final Obj.GroupSpawn[][] centerAreaObjs = new Obj.GroupSpawn[][]{
 		new Obj.GroupSpawn[]{
@@ -201,18 +246,22 @@ public class Conf {
 			new Obj.GroupSpawn(starObj, 48, 1, 1, starObj.size, segmentSize - starObj.size - 1),
 		},
 		new Obj.GroupSpawn[]{
+			new Obj.GroupSpawn(pentaObj, 96, 3, 5, 24000, 36000),
+			new Obj.GroupSpawn(bPentaObj, 148, 1, 3, segmentSize - 3, 1),
+			new Obj.GroupSpawn(starObj, 64, 1, 3, starObj.size, segmentSize / 2),
+			new Obj.GroupSpawn(movingPolygon, 48, 1, 0, 0, 1),
 		},
 	};
 	public static final int[] levels = new int[]{
 		3, 4, 6, 10, 13, // 5
 		15, 17, 20, 23, 25, // 10
-		35, 45, 55, 77, 99, // 15
-		137, 199, 299, 433, 665, // 20
-		777, 999, 1099, 1199, 1247, // 25
-		1477, 1599, 1699, 1877, 2001, // 30
-		2222, 2322, 2422, 2543, 2667, // 35
-		2801, 3000, 3333, 3633, 3999, // 40
-		4444, 4999, 5999, 7555, 9999, // 45
+		35, 45, 55, 60, 65, // 15
+		75, 83, 95, 107, 120, // 20
+		135, 150, 167, 185, 208, // 25
+		230, 260, 290, 320, 355, // 30
+		390, 425, 550, 580, 610, // 35
+		650, 690, 740, 800, 860, // 40
+		930, 1000, 1070, 1150, 1240, // 45
 	};
 	public static final int[] upgradesSpeed = new int[]{ // for each 2 values you multiply value by first value and divide by second;
 		1, 1, // 0 (no upgrade)
@@ -356,12 +405,12 @@ public class Conf {
 	public static final Obj minigunBullet = new Obj(0, 0, 0, 0, 1350, 10, basicBulletLifetime, basicBulletHealth, 0, 0, 2000, 0, ObjBehavior.newDefault(), new ObjDisplay.Circle(150), (byte) 0xff, Obj.ObjType.Bullet, noC, noC, new Obj.Barrel[]{});
 	public static final Obj destroyerBullet = new Obj(0, 0, 0, 0, 5000, 40, 360 /* 6 seconds */, basicBulletHealth, 0, 0, 15000, 1, ObjBehavior.newDefault(), new ObjDisplay.Circle(defaultObjBorder), (byte) 0xff, Obj.ObjType.Bullet, noC, noC, new Obj.Barrel[]{});
 	
-	public static final Obj basicTank = new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, Conf.tankFrendlyBodyColor, Conf.tankFrendlyBorderColor, new Obj.Barrel[]{
+	public static final Obj basicTank = new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, Conf.tankFrendlyBodyColor, Conf.tankFrendlyBorderColor, new Obj.Barrel[]{
 		new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, basicBulletRecoil, 0, new BarrelDisplay.Generic(5000, 0, 2000, 2000), basicTankBullet),
 	});
 	// 0-7 bit: class level (0 for 15, 1 for 30, etc…)
 	// 8-24 bit: avaiable after class id (0xffff for basic class)
-	public static final int[] classes = new int[]{
+	public static final int[] builtinClasses = new int[]{
 		0 | (0xffff << 8), // gunner 0
 		0 | (0xffff << 8), // twin 1
 		0 | (0xffff << 8), // flank guard 2
@@ -372,52 +421,52 @@ public class Conf {
 		1 | (1 << 8), // quad tank 7
 		1 | (1 << 8), // twin flank 8
 	};
-	public static final Obj[] classTanks = new Obj[]{
+	public static final Obj[] builtinClassTanks = new Obj[]{
 		// gunner
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 20, 0, Obj.Direction.defScale / 3, basicBulletRecoil, 0, new BarrelDisplay.Generic(5000, 0, 2000, -2000, 2000, -3000, 3000), defaultBullet),
 		}),
 		// twin
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, basicBulletRecoil, 0, new BarrelDisplay.Generic(5000, -1650, 2000, 2500), defaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 23, basicBulletSpread, basicBulletRecoil, 0, new BarrelDisplay.Generic(5000, 1650, 2000, 2500), defaultBullet),
 		}),
 		// flank guard
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, 0, new BarrelDisplay.Generic(5000, 0, 2000, 2000), basicTankBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, Obj.Direction.defScale * 2, new BarrelDisplay.Generic(4000, 0, 2000, 2000), basicTankBullet),
 		}),
 		// sniper
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(300, 55, 0, basicBulletSpread / 2, 90, 0, new BarrelDisplay.Generic(6500, 0, 2000, 2000),
 				new Obj(0, 0, 0, 0, 2000, 17, basicBulletLifetime, basicBulletHealth, 0, 0, 9500, 0, ObjBehavior.newDefault(), new ObjDisplay.Circle(defaultObjBorder), (byte) 0xff, Obj.ObjType.Bullet, noC, noC, new Obj.Barrel[]{})),
 		}),
 		// minigun
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 40, 0, basicBulletSpread, 20, 0, new BarrelDisplay.Generic(4500, 900, 2000, 1350), minigunBullet),
 			new Obj.Barrel(basicBulletSpeed, 40, 20, basicBulletSpread, 20, 0, new BarrelDisplay.Generic(4500, -900, 2000, 1350), minigunBullet),
 			new Obj.Barrel(basicBulletSpeed, 40, 30, basicBulletSpread, 20, 0, new BarrelDisplay.Generic(3500, 2550, 1500, 1350), minigunBullet),
 			new Obj.Barrel(basicBulletSpeed, 40, 10, basicBulletSpread, 20, 0, new BarrelDisplay.Generic(3500, -2550, 1500, 1350), minigunBullet),
 		}),
 		// destroyer
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0,  0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0,  0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 115, 0, basicBulletSpread, 500, 0, new BarrelDisplay.Generic(5000, 0, 1500, 5000), destroyerBullet),
 		}),
 		// triple shot
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, -Obj.Direction.defScale / 2, new BarrelDisplay.Generic(5000, 0, 2000, 2500), biggerDefaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 90, 0, new BarrelDisplay.Generic(5000, 0, 2000, 2500), biggerDefaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, Obj.Direction.defScale / 2, new BarrelDisplay.Generic(5000, 0, 2000, 2500), biggerDefaultBullet),
 		}),
 		// quad tank
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, 0, new BarrelDisplay.Generic(5000, 0, 2000, 2500), biggerDefaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, Obj.Direction.defScale, new BarrelDisplay.Generic(5000, 0, 2000, 2500), biggerDefaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, Obj.Direction.defScale * 2, new BarrelDisplay.Generic(5000, 0, 2000, 2500), biggerDefaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, Obj.Direction.defScale * 3, new BarrelDisplay.Generic(5000, 0, 2000, 2500), biggerDefaultBullet),
 		}),
 		// twin flank
-		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, ObjBehavior.newDefault(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
+		new Obj(0, 0, basicTankSize, basicWeight, 0, basicTankHealth, 0, 0, basicTankSpeed, new ObjBehavior.PlayerBehavior(), new ObjDisplay.Circle(), Obj.ObjType.Tank, tankFrendlyBodyColor, tankFrendlyBorderColor, new Obj.Barrel[]{
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, 0, new BarrelDisplay.Generic(5000, -1650, 2000, 2500), biggerDefaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 23, basicBulletSpread, 0, 0, new BarrelDisplay.Generic(5000, 1650, 2000, 2500), biggerDefaultBullet),
 			new Obj.Barrel(basicBulletSpeed, 45, 0, basicBulletSpread, 0, Obj.Direction.defScale * 2, new BarrelDisplay.Generic(5000, -1650, 2000, 2500), biggerDefaultBullet),
@@ -425,11 +474,13 @@ public class Conf {
 		}),
 	};
 	
-	// window
-	public static final String winTitle = "deip.oi 1.0";
-	
 	// misc
+	public static final String version = "1.1";
 	public static final int calcTimeCycles = 30; // number of cycles to refresh avg calc time and from these calc this value
 	public static final int betweenFuncRange = 4096;
+	public static final int versionId = 0;
+	
+	// window
+	public static final String winTitle = "deip.oi v" + version;
 	
 }
