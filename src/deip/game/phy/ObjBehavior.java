@@ -14,7 +14,7 @@ public class ObjBehavior implements Cloneable {
 	public void damageDealed(Phy game, Obj[] objs, int objNum, int id, int psychopath, String hurtedBy, int healthLost, int armorLost) {} // to this obj, called before potentially being killed
 	public void collide(Phy game, Obj[] objs, int objNum, int id, int idw) {}
 	public void killed(Phy game, Obj[] objs, int objNum, int id, int objKiller, String killer) {} // called after being killed
-	public void disappeared(Phy game, Obj[] objs, int objNum, int id) {} // called before disappearing
+	public boolean /* do finally disappear */ disappearing(Phy game, Obj[] objs, int objNum, int id) {return true;} // called before disappearing
 	
 	public ObjBehavior clone() throws CloneNotSupportedException {
 		
@@ -30,8 +30,8 @@ public class ObjBehavior implements Cloneable {
 		
 		if (behavior.dmgAnim > -1) {
 			
-			objs[id].bodyColor = Util.colorBetween(behavior.bodyColor, Conf.dmgColor, behavior.dmgAnim * Conf.betweenFuncRange / Conf.dmgAnimTime);
-			objs[id].borderColor = Util.colorBetween(behavior.borderColor, Conf.dmgColor, behavior.dmgAnim * Conf.betweenFuncRange / Conf.dmgAnimTime);
+			objs[id].currentDisplayBodyColor = Util.colorBetween(objs[id].generalBodyColor, Conf.dmgColor, behavior.dmgAnim * Conf.betweenFuncRange / Conf.dmgAnimTime);
+			objs[id].currentDisplayBorderColor = Util.colorBetween(objs[id].generalBorderColor, Conf.dmgColor, behavior.dmgAnim * Conf.betweenFuncRange / Conf.dmgAnimTime);
 			
 		}
 		
@@ -65,17 +65,8 @@ public class ObjBehavior implements Cloneable {
 		
 		int dying = 0;
 		int dmgAnim = -1;
-		Color bodyColor;
-		Color borderColor;
 		
 		public void damageDealed(Phy game, Obj[] objs, int objNum, int id, int psychopath, String hurtedBy, int healthLost, int armorLost) {
-			
-			if (dmgAnim < 0) {
-				
-				bodyColor = objs[id].bodyColor;
-				borderColor = objs[id].borderColor;
-				
-			}
 			
 			dmgAnim = Conf.dmgAnimTime;
 			
@@ -95,6 +86,31 @@ public class ObjBehavior implements Cloneable {
 		public DefaultObjBehavior clone() throws CloneNotSupportedException {
 			
 			return (DefaultObjBehavior) super.clone();
+		}
+		
+	}
+	
+	public static class PlayerBehavior extends DefaultObjBehavior implements Cloneable {
+		
+		public void killed(Phy game, Obj[] objs, int objNum, int id, int killerObj, String killer) {
+			
+			game.mainPlayerdied = true;
+			
+			super.killed(game, objs, objNum, id, killerObj, killer);
+		}
+		
+		public boolean disappearing(Phy game, Obj[] objs, int objNum, int id) {
+			//objs[id] = new Obj(0, 0, 6000, -1, 0, 1, 0, objs[id].score, 0, none, new ObjDisplay(), Obj.ObjType.Tank, Conf.noC, Conf.noC, new Obj.Barrel[]{});
+			
+			this.dying = 0;
+			objs[id].trans = 1;
+			
+			return false;
+		}
+		
+		public PlayerBehavior clone() throws CloneNotSupportedException {
+			
+			return (PlayerBehavior) super.clone();
 		}
 		
 	}
@@ -138,16 +154,17 @@ public class ObjBehavior implements Cloneable {
 			int sy = objs[id].y;
 			
 			for (int a = 0; a < objNum; a++) {
-				Obj.Direction path = new Obj.Direction(sx - objs[a].x, sy - objs[a].y, 0);
-				path = path.newScale((Conf.paneKnockbackRange - path.length()) / Conf.paneKnockbackDivide / objs[a].weight).normalize().round();
-				
-				if (path.scale > 0) {
+				if (a != id) {
+					Obj.Direction path = new Obj.Direction(sx - objs[a].x, sy - objs[a].y, 0);
+					path = path.newScale((Conf.paneKnockbackRange - path.length()) / Conf.paneKnockbackDivide / objs[a].weight).normalize().round();
 					
-					objs[a].xm -= path.x;
-					objs[a].ym -= path.y;
-					
+					if (path.scale > 0) {
+						
+						objs[a].xm -= path.x;
+						objs[a].ym -= path.y;
+						
+					}
 				}
-				
 			}
 			
 			super.killed(game, objs, objNum, id, objKiller, killer);

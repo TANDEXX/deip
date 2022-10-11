@@ -4,7 +4,7 @@ import java.awt.Point;
 
 import deip.Root;
 import deip.data.*;
-import deip.g.*;
+import deip.graphics.*;
 import deip.lib.*;
 
 public class Phy {
@@ -28,21 +28,24 @@ public class Phy {
 		
 	}
 	
-	public Obj.MapSegment[] mapSegments = new Obj.MapSegment[Conf.allSegments];
+	public Obj.MapSegment[] mapSegments;
 	public Obj.GroupSpawn[] regularAreaObjs;
 	public Obj.GroupSpawn[] centerAreaObjs;
-	public Obj[] objects = new Obj[Conf.maxObjects];
-	public MouseAction mouseAction = new MouseAction();
+	public Obj[] objects;
+	public MouseAction mouseAction;
+	public AtEnd atEnd = AtEnd.Continue;
 	public boolean died = false; // temporary value saying do object should disappear or not (use in object behavior to remove current object)
 	private boolean serverMode;
+	public boolean mainPlayerdied;
 	public int mainPlayer = 0;
 	public int mainPlayerLastScore = 0;
 	public int objectNumber = 1;
 	public int player = 0;
 	public int rareCycleCounter = 0;
 	public int calcTime = 0;
-	public int[] lastSeenSegments = new int[4];
-	public Obj.Player[] players = new Obj.Player[]{new Obj.Player(player)};
+	public int[] lastSeenSegments;
+	public Obj.Player[] players;
+	public Record record;
 	
 	public long delay = 1000 / 60;
 	public Runnable calcLoop = new Runnable() {
@@ -50,6 +53,7 @@ public class Phy {
 		public void run() {
 			int calcTimeCycle = 0;
 			int calcTimeAverage = 0;
+			Log.info("physics engine started");
 			
 			while (true) {
 				long startTime = System.currentTimeMillis(); // do the work here:
@@ -58,10 +62,19 @@ public class Phy {
 					
 					calc();
 					
+					if (atEnd == AtEnd.ReInit) {
+						init();
+					} else if (atEnd == AtEnd.Stop) {
+						atEnd = AtEnd.Continue;
+						Log.info("physics engine stopped");
+						break;
+					}
+					atEnd = AtEnd.Continue;
+					
 				} catch (Throwable e) {
 					
-					System.out.println("exception thrown in phy thread, stack trace in stderr");
-					e.printStackTrace();
+					System.out.println("exception thrown in phy thread, stack trace in stderr and logs");
+					Log.exception(e);
 					
 				}
 				
@@ -88,6 +101,8 @@ public class Phy {
 		}
 	};
 	
+	// not intented to use it, some other class throws ugly error when you delete it or make private
+	public Phy() {}
 	public Phy(boolean serverMode, int separationLevel) {
 		
 		this.serverMode = serverMode;
@@ -97,6 +112,15 @@ public class Phy {
 	}
 	
 	public void init() throws CloneNotSupportedException {
+		Log.info("physics engine reinitialized");
+		//record = Record.newEmpty(Data.recordFrameRate);
+		mapSegments = new Obj.MapSegment[Conf.allSegments];
+		mainPlayerdied = false;
+		objects = new Obj[Conf.maxObjects];
+		mouseAction = new MouseAction();
+		objectNumber = 1;
+		players = new Obj.Player[]{new Obj.Player(player)};
+		lastSeenSegments = new int[4];
 		int playerSegment = Root.rand.nextInt(Conf.allSegments);
 		Point playerPos = Obj.MapSegment.segmentPos(playerSegment);
 		playerPos = new Point(playerPos.x + Conf.segmentSize / 2, playerPos.y + Conf.segmentSize / 2);
@@ -135,10 +159,12 @@ public class Phy {
 		int objNumCp = objectNumber;
 		int tmp0;
 		
-		if (Input.up) objCp[player].ym -= objCp[player].speed;
-		if (Input.down) objCp[player].ym += objCp[player].speed;
-		if (Input.left) objCp[player].xm -= objCp[player].speed;
-		if (Input.right) objCp[player].xm += objCp[player].speed;
+		if (!mainPlayerdied) {
+			if (Input.up) objCp[player].ym -= objCp[player].speed;
+			if (Input.down) objCp[player].ym += objCp[player].speed;
+			if (Input.left) objCp[player].xm -= objCp[player].speed;
+			if (Input.right) objCp[player].xm += objCp[player].speed;
+		}
 		
 		Obj.Direction pdir = new Obj.Direction(mouseAction.x, mouseAction.y, Obj.Direction.defScale).normalize();
 		objCp[player].dir = pdir;
@@ -152,7 +178,7 @@ public class Phy {
 			if (players[a].classId == 0xffff) {
 				classTank = Conf.basicTank;
 			} else {
-				classTank = Conf.classTanks[players[a].classId];
+				classTank = Data.classTanks[players[a].classId];
 			}
 			
 			if (players[a].toSet) {
@@ -165,10 +191,10 @@ public class Phy {
 					
 				}
 				
-				
-				objCp[players[a].objId].regenerate = classTank.regenerate * players[a].maxhpLevel * Conf.upgradesRegenerate[players[a].regenLevel * 2] / Conf.upgradesRegenerate[players[a].regenLevel * 2 + 1];
+				int oldRegenWait = objCp[players[a].objId].regenWait;
+				objCp[players[a].objId].regenerate = classTank.regenerate * (players[a].maxhpLevel + 1) * Conf.upgradesRegenerate[players[a].regenLevel * 2] / Conf.upgradesRegenerate[players[a].regenLevel * 2 + 1]; // yes, this should bee better made but I want to end this game fastly
 				objCp[players[a].objId].regenWait = classTank.regenWait * Conf.upgradesRegenWait[players[a].regenLevel * 2] / Conf.upgradesRegenWait[players[a].regenLevel * 2 + 1];
-				objCp[players[a].objId].regenWaitCounter = classTank.regenWaitCounter * Conf.upgradesRegenWait[players[a].regenLevel * 2] / Conf.upgradesRegenWait[players[a].regenLevel * 2 + 1];
+				objCp[players[a].objId].regenWaitCounter = objCp[players[a].objId].regenWaitCounter * objCp[players[a].objId].regenWait / oldRegenWait;
 				objCp[players[a].objId].maxhp = classTank.maxhp * Conf.upgradesHp[players[a].maxhpLevel * 2] / Conf.upgradesHp[players[a].maxhpLevel * 2 + 1];
 				objCp[players[a].objId].health = (int) ((long) objCp[players[a].objId].health * (long) objCp[players[a].objId].maxhp / (long) oldMaxhp);
 				for (int b = 0; b < objCp[players[a].objId].barrels.length; b++) {
@@ -197,13 +223,13 @@ public class Phy {
 		
 		for (int a = 0; a != objCp[player].barrels.length; a++) {
 			
-			objCp[player].barrels[a].shootCountDown--;
+			objCp[player].barrels[a].shotCountDown--;
 			
 			if (mouseAction.clicked) {
 				
 				objCp[player].barrels[a].reachedZero = false;
 				
-				if (objCp[player].barrels[a].shootCountDown < 0) {
+				if (objCp[player].barrels[a].shotCountDown < 0) {
 					Point shootPoint = objCp[player].barrels[a].display.shootPoint();
 					int spread = Root.rand.nextInt(objCp[player].barrels[a].spread) - (objCp[player].barrels[a].spread / 2);
 					Obj.Direction shootAngle = Obj.Direction.rawSinus(objCp[player].barrels[a].currentDegrees + spread, Obj.Direction.defScale).normalize().newScale(shootPoint.y).normalize().round().xOffset(shootPoint.x);
@@ -215,12 +241,14 @@ public class Phy {
 					objCp[objNumCp].y = objCp[player].y + shootAngle.y;
 					objCp[objNumCp].xm = shootDir.x + objCp[player].xm;
 					objCp[objNumCp].ym = shootDir.y + objCp[player].ym;
-					objCp[objNumCp].bodyColor = Util.colorBetween(objCp[player].bodyColor, Conf.bulletPartColor, Conf.bulletColorSwap);
-					objCp[objNumCp].borderColor = Util.colorBetween(objCp[player].borderColor, Conf.bulletPartColor, Conf.bulletColorSwap);
+					objCp[objNumCp].generalBodyColor = Util.colorBetween(objCp[player].generalBodyColor, Conf.bulletPartColor, Conf.bulletColorSwap);
+					objCp[objNumCp].generalBorderColor = Util.colorBetween(objCp[player].generalBorderColor, Conf.bulletPartColor, Conf.bulletColorSwap);
+					objCp[objNumCp].currentDisplayBodyColor = objCp[objNumCp].generalBodyColor;
+					objCp[objNumCp].currentDisplayBorderColor = objCp[objNumCp].generalBorderColor;
 					//objCp[objNumCp] = new Obj(objCp[player].x + shootAngle.x, objCp[player].y + shootAngle.y, shootDir.x + objCp[player].xm, shootDir.y + objCp[player].ym, objCp[player].barrels[a].bsize, objCp[player].barrels[a].bWeight, objCp[player].barrels[a].blifetime, objCp[player].barrels[a].bhealth, 0, 0, objCp[player].barrels[a].bdamage, 0, ObjBehavior.newDefault(), new ObjDisplay.Circle(), (byte) 0xff, Obj.ObjType.Bullet, , , new Obj.Barrel[0]);
 					objCp[objNumCp].owner = player;
-					objCp[player].barrels[a].shootCountDown = objCp[player].barrels[a].reload;
-					objCp[player].barrels[a].shootOffset = Conf.defBarrelShootOffset;
+					objCp[player].barrels[a].shotCountDown = objCp[player].barrels[a].reload;
+					objCp[player].barrels[a].shotOffset = Conf.defBarrelShootOffset;
 					objCp[player].xm += recoil.x;
 					objCp[player].ym += recoil.y;
 					objNumCp++;
@@ -229,7 +257,7 @@ public class Phy {
 				
 			} else {
 				
-				if (objCp[player].barrels[a].shootCountDown < 0) {
+				if (objCp[player].barrels[a].shotCountDown < 0) {
 					
 					objCp[player].barrels[a].reachedZero = true;
 					
@@ -237,7 +265,7 @@ public class Phy {
 				
 				if (objCp[player].barrels[a].reachedZero) {
 					
-					objCp[player].barrels[a].shootCountDown = objCp[player].barrels[a].delay;
+					objCp[player].barrels[a].shotCountDown = objCp[player].barrels[a].delay;
 					objCp[player].barrels[a].reachedZero = true;
 					
 				}
@@ -250,7 +278,7 @@ public class Phy {
 			
 			rareCycleCounter = 0;
 			
-			int[] seenSegments = Obj.MapSegment.seenSegments(objCp[player].x, objCp[player].y, Conf.displaySizeX / 2, Conf.displaySizeY / 2);
+			int[] seenSegments = Obj.MapSegment.seenSegments(objCp[player].x, objCp[player].y, objCp[player].fovX / 2, objCp[player].fovY / 2);
 			//System.out.println("seenSegments: " + Util.intArrayToString(seenSegments) + ", lastSeenSegments: " + Util.intArrayToString(lastSeenSegments));
 			
 			for (int sca = 0; sca < 4; sca++) {
@@ -284,7 +312,7 @@ public class Phy {
 						
 						if (Obj.MapSegment.segment(objCp[a].x, objCp[a].y) == seg) {
 							
-							objCp[a].behavior.disappeared(this, objCp, objNumCp, a);
+							objCp[a].behavior.disappearing(this, objCp, objNumCp, a);
 							remove(objCp, objNumCp, a);
 							objNumCp--;
 							//System.out.println("REMOVED: " + (a + o));
@@ -410,6 +438,7 @@ public class Phy {
 			}
 			
 			objCp[a].regenWaitCounter--;
+			//if (a == 0) {Log.info("player has " + objCp[a].regenWaitCounter + " regenWaitCounter");}
 			
 			if (objCp[a].regenWaitCounter < 0) {
 				
@@ -483,20 +512,21 @@ public class Phy {
 			
 			for (int b = 0; b != objCp[a].barrels.length; b++) {
 				
-				objCp[a].barrels[b].shootOffset = (int) ((double) objCp[a].barrels[b].shootOffset / 1.1);
+				objCp[a].barrels[b].shotOffset = (int) ((double) objCp[a].barrels[b].shotOffset / 1.1);
 				
 			}
 			
 			//System.out.println("id: " + a + ", X: " + objCp[a].x + ", Y: " + objCp[a].y);
 			
 			if (died) {
-				
-				objCp[a].behavior.disappeared(this, objCp, objNumCp, a);
-				died = false;
-				remove(objCp, objNumCp, a);
-				objNumCp--;
-				a--;
-				
+				if (objCp[a].behavior.disappearing(this, objCp, objNumCp, a)) {
+					
+					died = false;
+					remove(objCp, objNumCp, a);
+					objNumCp--;
+					a--;
+					
+				}
 			}
 			
 		}
@@ -534,6 +564,7 @@ public class Phy {
 		
 		objects = objCp;
 		objectNumber = objNumCp;
+		//record.recordFrame(objCp, objNumCp);
 	}
 	
 	public void resetMapSegments(Obj.MapSegment[] ms) {
@@ -641,7 +672,6 @@ public class Phy {
 	public void kill(Obj[] obj, int objNum, int idx, int objKiller, String killer) {
 		int seg = obj[idx].seg;
 		int group = obj[idx].group;
-		obj[idx].lifeTime = Conf.destroyTime;
 		int realKiller = objKiller;
 		
 		while (obj[realKiller].owner != Integer.MAX_VALUE) {
@@ -723,6 +753,14 @@ public class Phy {
 		boolean clickFlag = clicked;
 		
 		mouseAction = new MouseAction(x, y, clickFlag);
+		
+	}
+	
+	public enum AtEnd {
+		
+		Continue,
+		ReInit, // restart game
+		Stop,
 		
 	}
 	

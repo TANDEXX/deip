@@ -2,7 +2,7 @@ package deip.game.phy;
 
 import deip.data.Conf;
 import deip.lib.Util;
-import deip.g.*;
+import deip.graphics.*;
 import java.awt.*;
 
 public class Obj implements Cloneable {
@@ -341,8 +341,8 @@ public class Obj implements Cloneable {
 		public int degrees;
 		// currents
 		public int currentDegrees;
-		public int shootCountDown = 0;
-		public int shootOffset = 0;
+		public int shotCountDown = 0;
+		public int shotOffset = 0;
 		public boolean reachedZero = true;
 		
 		public Barrel(int bSpeed, int reload, int delay, int spread, int recoil, int degrees, BarrelDisplay display, Obj bullet) {
@@ -362,8 +362,8 @@ public class Obj implements Cloneable {
 		public Barrel clone() throws CloneNotSupportedException {
 			Barrel result = new Barrel(bspeed, reload, delay, spread, recoil, degrees, display.clone(), bullet.clone());
 			result.currentDegrees = currentDegrees;
-			result.shootCountDown = shootCountDown;
-			result.shootOffset = shootOffset;
+			result.shotCountDown = shotCountDown;
+			result.shotOffset = shotOffset;
 			result.reachedZero = reachedZero;
 			
 			return result;
@@ -451,10 +451,14 @@ public class Obj implements Cloneable {
 	public int bodyDmg;
 	public int speed;
 	public int weight;
+	public int fovX = Conf.displaySizeX;
+	public int fovY = Conf.displaySizeY;
 	public int barrelBorder = Conf.defaultObjBorder;
 	public Direction dir = new Direction(0, Direction.defScale, Direction.defScale);
-	public Color bodyColor;
-	public Color borderColor;
+	public Color currentDisplayBodyColor;
+	public Color currentDisplayBorderColor;
+	public Color generalBodyColor;
+	public Color generalBorderColor;
 	public ObjBehavior behavior;
 	public ObjDisplay display;
 	public ObjType type;
@@ -485,14 +489,16 @@ public class Obj implements Cloneable {
 		this.lifeTime = lifeTime;
 		this.trans = trans;
 		this.type = type;
-		this.bodyColor = bodyColor;
-		this.borderColor = borderColor;
+		this.currentDisplayBodyColor = bodyColor;
+		this.currentDisplayBorderColor = borderColor;
+		generalBodyColor = bodyColor;
+		generalBorderColor = borderColor;
 		this.barrels = barrels;
 		
 	}
 	
 	public Obj clone() throws CloneNotSupportedException {
-		Obj o = new Obj(x, y, xm, ym, size, weight, lifeTime, maxhp, armor, score, bodyDmg, speed, behavior.clone(), display.clone(), trans, type, bodyColor, borderColor, Util.cloneBarrelArray(barrels));
+		Obj o = new Obj(x, y, xm, ym, size, weight, lifeTime, maxhp, armor, score, bodyDmg, speed, behavior.clone(), display.clone(), trans, type, currentDisplayBodyColor, currentDisplayBorderColor, Util.cloneBarrelArray(barrels));
 		o.seg = seg;
 		o.group = group;
 		o.owner = owner;
